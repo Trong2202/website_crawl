@@ -32,6 +32,3 @@ all_brands.json
 # OS
 .DS_Store
 Thumbs.db
-
-# UV
-uv.lock
