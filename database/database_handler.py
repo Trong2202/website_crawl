@@ -88,6 +88,17 @@ class DatabaseHandler:
             Product ID (bigint) hoặc None nếu thất bại/duplicate
         """
         try:
+            product_id = product_data.get('product_id', '')
+            if product_id and len(product_id) > 100:
+                trimmed_id = product_id[:100]
+                logger.warning(
+                    f"Product ID quá dài ({len(product_id)}). Đang cắt xuống 100 ký tự: {trimmed_id}"
+                )
+                product_data = {
+                    **product_data,
+                    'product_id': trimmed_id
+                }
+
             # Gọi function từ schema raw
             result = self.client.schema('raw').rpc(
                 'safe_insert_product_api',

@@ -18,6 +18,8 @@ from utils.helpers import (
     make_request,
     parse_html,
     normalize_brand_name,
+    format_price,
+    extract_bought_value,
 )
 from database.database_handler import DatabaseHandler
 import config
@@ -35,7 +37,12 @@ def build_product_id(source_name: str, url: str) -> str:
     slug = re.sub(r"[^a-zA-Z0-9\-]+", "-", slug).strip("-")
     if not slug:
         slug = uuid.uuid4().hex[:10]
-    return f"{source_name}-{slug}".lower()
+    product_id = f"{source_name}-{slug}".lower()
+    if len(product_id) > 100:
+        max_slug_len = max(1, 100 - len(source_name) - 1)
+        slug = slug[:max_slug_len].rstrip("-")
+        product_id = f"{source_name}-{slug}".lower()
+    return product_id
 
 
 def text_or_empty(element: BeautifulSoup) -> str:
@@ -57,9 +64,13 @@ def extract_lamthaocosmetics_products(soup: BeautifulSoup, brand: str) -> List[D
         if not url or not name:
             continue
 
-        price = text_or_empty(card.select_one("span.price-del"))
-        price_sale = text_or_empty(card.select_one("span.price"))
-        bought = text_or_empty(card.select_one("div.bottomloopend21"))
+        price_text = text_or_empty(card.select_one("span.price-del"))
+        price_sale_text = text_or_empty(card.select_one("span.price"))
+        bought_text = text_or_empty(card.select_one("div.bottomloopend21"))
+
+        price_value = int(format_price(price_text)) if price_text else 0
+        price_sale_value = int(format_price(price_sale_text)) if price_sale_text else 0
+        bought_value = extract_bought_value(bought_text)
 
         product = {
             "product_id": build_product_id(config.WEBSITE_1_NAME, url),
@@ -68,9 +79,12 @@ def extract_lamthaocosmetics_products(soup: BeautifulSoup, brand: str) -> List[D
                 "brand": brand,
                 "category": "",
                 "name": name,
-                "price": price,
-                "price_sale": price_sale,
-                "bought": bought,
+                "price_text": price_text,
+                "price": price_value,
+                "price_sale_text": price_sale_text,
+                "price_sale": price_sale_value,
+                "bought_text": bought_text,
+                "bought": bought_value,
                 "url": url,
             },
         }
@@ -92,9 +106,13 @@ def extract_thegioiskinfood_products(soup: BeautifulSoup, brand: str) -> List[Di
             continue
 
         brand_text = text_or_empty(card.select_one(".loopvendor .fill-vendor")) or brand
-        price = text_or_empty(card.select_one("p.productPrice del"))
-        price_sale = text_or_empty(card.select_one("p.productPrice b"))
-        bought = text_or_empty(card.select_one(".productLoop-sold-qtt"))
+        price_text = text_or_empty(card.select_one("p.productPrice del"))
+        price_sale_text = text_or_empty(card.select_one("p.productPrice b"))
+        bought_text = text_or_empty(card.select_one(".productLoop-sold-qtt"))
+
+        price_value = int(format_price(price_text)) if price_text else 0
+        price_sale_value = int(format_price(price_sale_text)) if price_sale_text else 0
+        bought_value = extract_bought_value(bought_text)
 
         product = {
             "product_id": build_product_id(config.WEBSITE_2_NAME, url),
@@ -103,9 +121,12 @@ def extract_thegioiskinfood_products(soup: BeautifulSoup, brand: str) -> List[Di
                 "brand": brand_text,
                 "category": "",
                 "name": name,
-                "price": price,
-                "price_sale": price_sale,
-                "bought": bought,
+                "price_text": price_text,
+                "price": price_value,
+                "price_sale_text": price_sale_text,
+                "price_sale": price_sale_value,
+                "bought_text": bought_text,
+                "bought": bought_value,
                 "url": url,
             },
         }

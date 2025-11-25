@@ -1,6 +1,7 @@
 """
 Helper functions cho pipeline crawl
 """
+import re
 import time
 import requests
 from typing import Optional, Dict, Any
@@ -135,20 +136,10 @@ def normalize_brand_name(brand: str) -> str:
 
 def format_price(price_str: str) -> float:
     """
-    Format chuỗi giá thành số float
-    
-    Args:
-        price_str: Chuỗi giá (VD: "250.000₫")
-        
-    Returns:
-        Giá dạng float
+    Giữ tương thích cũ - trả về số từ chuỗi giá.
+    Sử dụng giá trị đầu tiên nếu có nhiều mức (vd: "150k - 200k").
     """
-    try:
-        # Loại bỏ ký tự không phải số
-        price = price_str.replace('₫', '').replace('.', '').replace(',', '').strip()
-        return float(price) if price else 0.0
-    except:
-        return 0.0
+    return extract_price_value(price_str)
 
 
 def calculate_discount_percent(original_price: float, sale_price: float) -> float:
@@ -165,4 +156,35 @@ def calculate_discount_percent(original_price: float, sale_price: float) -> floa
     if original_price > 0 and sale_price > 0:
         return round(((original_price - sale_price) / original_price) * 100, 2)
     return 0.0
+
+
+def extract_price_value(price_str: str) -> float:
+    """
+    Lấy giá trị số đầu tiên trong chuỗi giá, loại bỏ ký tự tiền tệ/khoảng.
+    """
+    if not price_str:
+        return 0.0
+    first_part = price_str.split("-")[0]
+    digits = re.sub(r"[^\d]", "", first_part)
+    return float(digits) if digits else 0.0
+
+
+def extract_bought_value(bought_str: str) -> int:
+    """
+    Chuyển đổi chuỗi số đã bán (vd: '2,1k') thành integer.
+    """
+    if not bought_str:
+        return 0
+    text = bought_str.lower().replace(",", ".")
+    match = re.search(r"([\d\.]+)\s*([km]?)", text)
+    if match:
+        value = float(match.group(1))
+        suffix = match.group(2)
+        if suffix == "k":
+            value *= 1_000
+        elif suffix == "m":
+            value *= 1_000_000
+        return int(value)
+    digits = re.sub(r"[^\d]", "", text)
+    return int(digits) if digits else 0
 
