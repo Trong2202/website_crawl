@@ -1,0 +1,243 @@
+================================================================================
+            PIPELINE CRAWL DỮ LIỆU MỸ PHẨM - THÔNG TIN DỰ ÁN
+================================================================================
+
+Dự án: Pipeline Crawl Dữ Liệu Sản Phẩm Mỹ Phẩm
+Ngày tạo: 25/11/2025
+Môi trường: Python + UV Package Manager
+Database: Supabase (PostgreSQL)
+
+================================================================================
+I. CÁC FILE CHÍNH ĐÃ TẠO
+================================================================================
+
+FILE PYTHON CHÍNH (4 files):
+----------------------------
+1. config.py              (1.5 KB)  - Cấu hình toàn hệ thống
+2. crawl_brands.py        (6.8 KB)  - Crawl danh sách brands
+3. crawl_products.py      (17.4 KB) - Crawl sản phẩm theo brands  
+4. main_pipeline.py       (7.1 KB)  - Pipeline chính (entry point)
+
+MODULES HỖ TRỢ:
+--------------
+utils/
+├── logger.py             - Logging system (terminal + file)
+├── helpers.py            - Utilities (request, retry, delay, parsing...)
+└── __init__.py
+
+database/
+├── database_handler.py   - Supabase database handler
+└── __init__.py
+
+crawlers/
+└── __init__.py           - Package marker
+
+FILE CẤU HÌNH:
+-------------
+- brands.txt              - Danh sách brands cần crawl
+- .env                    - Cấu hình Supabase (cần tạo từ .envexample)
+- .envexample             - Template cho .env
+- database.sql            - Schema database Supabase
+- pyproject.toml          - Dependencies (UV)
+- uv.lock                 - Lock file dependencies
+- .gitignore              - Git ignore rules
+
+FILE HƯỚNG DẪN (3 files):
+------------------------
+- QUICK_START.txt         - Hướng dẫn chạy nhanh trong 3 bước
+- HUONG_DAN.txt           - Hướng dẫn sử dụng chi tiết
+- TONG_QUAN_DU_AN.txt     - Kiến trúc và tổng quan kỹ thuật
+- THONG_TIN_DU_AN.txt     - File này
+
+THƯ MỤC:
+--------
+- logs/                   - Chứa log files (auto-generated)
+- __pycache__/            - Python cache (gitignored)
+- .venv/                  - Virtual environment (nếu có)
+
+================================================================================
+II. TÍNH NĂNG CHÍNH
+================================================================================
+
+Crawl Brands:
+✓ Crawl tất cả brands từ 2 website
+✓ Export ra JSON để tra cứu
+✓ Chạy độc lập: uv run python crawl_brands.py
+
+Crawl Products:
+✓ Crawl sản phẩm theo danh sách brands trong brands.txt
+✓ Hỗ trợ 2 website: lamthaocosmetics.vn, thegioiskinfood.com
+✓ Trích xuất đầy đủ: tên, brand, giá, category, số bán, link...
+✓ Auto retry khi fail (3 lần)
+✓ Smart delay để tránh bị block
+
+Database Integration:
+✓ Tự động kết nối Supabase
+✓ Session tracking
+✓ Auto-deduplication
+✓ JSONB format linh hoạt
+✓ Lưu vào bảng product_api
+
+Logging System:
+✓ Log ra terminal với màu sắc
+✓ Log vào file logs/crawl_YYYY-MM-DD.log
+✓ Rotate daily, giữ 30 ngày
+✓ Auto compress log cũ
+
+Error Handling:
+✓ Robust try-catch ở mọi cấp độ
+✓ Continue crawl khi gặp lỗi đơn lẻ
+✓ Báo cáo brands thất bại
+✓ Summary report chi tiết
+
+================================================================================
+III. CÁCH SỬ DỤNG NHANH
+================================================================================
+
+BƯỚC 1: Setup
+-------------
+1. Copy .envexample → .env
+2. Điền SUPABASE_URL và SUPABASE_KEY vào .env
+3. Chạy database.sql trong Supabase SQL Editor
+4. Kiểm tra brands.txt có các brands cần crawl
+
+BƯỚC 2: Chạy Pipeline
+----------------------
+uv run python main_pipeline.py
+
+BƯỚC 3: Xem Kết Quả
+-------------------
+- Terminal: Xem real-time progress
+- Logs: logs/crawl_YYYY-MM-DD.log
+- Database: Supabase → raw.product_api
+
+================================================================================
+IV. CẤU TRÚC DỮ LIỆU
+================================================================================
+
+Bảng: raw.product_api
+
+Columns:
+- id                 (BIGSERIAL)    - Auto increment ID
+- product_id         (VARCHAR)      - Product ID từ URL
+- session_id         (UUID)         - Crawl session ID
+- source_name        (VARCHAR)      - Tên website
+- data               (JSONB)        - Dữ liệu sản phẩm đầy đủ
+- price              (NUMERIC)      - Giá hiện tại
+- bought             (INTEGER)      - Số đã bán
+- created_at         (TIMESTAMPTZ)  - Thời gian crawl
+
+JSONB Structure (data column):
+{
+  "name": "Tên sản phẩm",
+  "brand": {
+    "id": 0,
+    "name": "Brand Name"
+  },
+  "url": "https://...",
+  "price": 250000,
+  "market_price": 300000,
+  "bought": 150,
+  "discount_percent": 16.67,
+  "category": "Danh mục"
+}
+
+================================================================================
+V. DEPENDENCIES
+================================================================================
+
+Main Libraries:
+- requests          - HTTP requests
+- beautifulsoup4    - HTML parsing
+- lxml              - Fast HTML parser
+- pandas            - Data manipulation
+- supabase          - Supabase client
+- loguru            - Logging
+- tenacity          - Retry logic
+- python-dotenv     - Environment variables
+
+Full list: Xem pyproject.toml
+
+================================================================================
+VI. CẤU HÌNH MẶC ĐỊNH
+================================================================================
+
+REQUEST_DELAY = 1.5 seconds    - Delay giữa requests
+MAX_RETRIES = 3                - Số lần retry
+TIMEOUT = 30 seconds           - Request timeout
+
+Có thể thay đổi trong config.py
+
+================================================================================
+VII. FILE QUAN TRỌNG CẦN CHÚ Ý
+================================================================================
+
+1. .env - QUAN TRỌNG:
+   ✓ Chứa thông tin bí mật Supabase
+   ✓ KHÔNG commit vào Git (.gitignored)
+   ✓ Phải tạo từ .envexample
+
+2. brands.txt:
+   ✓ Điều khiển brands nào được crawl
+   ✓ Dễ dàng thêm/bớt brands
+   ✓ Comment bằng #
+
+3. database.sql:
+   ✓ Phải chạy một lần trước khi crawl
+   ✓ Tạo schema và functions cần thiết
+
+4. logs/:
+   ✓ Check logs khi có lỗi
+   ✓ Debug và audit trail
+
+================================================================================
+VIII. CHECKLIST TRƯỚC KHI CHẠY
+================================================================================
+
+[ ] Đã cài đặt uv (UV package manager)
+[ ] Đã tạo file .env với thông tin Supabase đúng
+[ ] Đã chạy database.sql trong Supabase
+[ ] Đã kiểm tra brands.txt có brands muốn crawl
+[ ] Đã test kết nối internet ổn định
+[ ] Đã đọc QUICK_START.txt hoặc HUONG_DAN.txt
+
+================================================================================
+IX. HỖ TRỢ & DEBUG
+================================================================================
+
+Nếu gặp lỗi:
+1. Kiểm tra logs trong logs/crawl_*.log
+2. Đảm bảo .env có thông tin đúng
+3. Test connection: uv run python crawl_brands.py
+4. Kiểm tra database schema đã setup
+5. Kiểm tra internet connection
+
+Các câu lệnh hữu ích:
+- Test crawl brands: uv run python crawl_brands.py
+- Chạy pipeline: uv run python main_pipeline.py
+- Sync dependencies: uv sync
+- Check Python version: python --version (cần >= 3.12)
+
+================================================================================
+X. TỔNG KẾT
+================================================================================
+
+Dự án hoàn chỉnh với:
+✓ 4 file Python chính
+✓ 6 modules hỗ trợ
+✓ 3 file hướng dẫn tiếng Việt
+✓ Auto retry, logging, error handling
+✓ Clean architecture, dễ maintain
+✓ Đơn giản hóa, tập trung vào mục tiêu chính
+✓ Sẵn sàng chạy production
+
+NEXT STEPS:
+1. Đọc QUICK_START.txt
+2. Setup .env và database
+3. Chạy pipeline
+4. Enjoy crawling!
+
+================================================================================
+                         CHÚC BẠN CRAWL THÀNH CÔNG!
+================================================================================
+

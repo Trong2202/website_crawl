@@ -1,0 +1,11 @@
+# Supabase Configuration
+SUPABASE_URL=your_supabase_url_here
+SUPABASE_KEY=your_supabase_anon_key_here
+SUPABASE_SCHEMA=raw
+
+# Target Websites
+WEBSITE_1=https://lamthaocosmetics.vn/collections/vendors?q={brand}
+WEBSITE_2=https://thegioiskinfood.com/collections/{brand}
+#Brands
+WEBSITE_BRANDS_1 = https://lamthaocosmetics.vn/collections/all
+WEBSITE_BRANDS_2= https://thegioiskinfood.com/pages/thuong-hieu

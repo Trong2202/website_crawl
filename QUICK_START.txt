@@ -1,0 +1,148 @@
+================================================================================
+                    QUICK START - CHẠY NGAY TRONG 3 BƯỚC
+================================================================================
+
+BƯỚC 1: CẤU HÌNH
+--------------------------------------------------------------------------------
+
+1.1. Copy và đổi tên file:
+     Sao chép .envexample → .env
+
+1.2. Điền thông tin Supabase vào file .env:
+     SUPABASE_URL=https://xxxxxxxx.supabase.co
+     SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+1.3. Kiểm tra file brands.txt:
+     - Mở file brands.txt
+     - Đảm bảo có các brand muốn crawl
+     - Mỗi dòng một brand
+     - Dòng bắt đầu bằng # sẽ bị bỏ qua
+
+================================================================================
+
+BƯỚC 2: CHẠY SETUP DATABASE
+--------------------------------------------------------------------------------
+
+2.1. Truy cập Supabase Dashboard
+2.2. Vào SQL Editor
+2.3. Copy toàn bộ nội dung file database.sql
+2.4. Paste và Execute
+2.5. Kiểm tra schema "raw" đã được tạo
+
+================================================================================
+
+BƯỚC 3: CHẠY PIPELINE
+--------------------------------------------------------------------------------
+
+3.1. Mở terminal tại thư mục dự án
+
+3.2. (Optional) Xem danh sách tất cả brands có sẵn:
+     
+     uv run python crawl_brands.py
+
+3.3. Chạy pipeline chính:
+     
+     uv run python main_pipeline.py
+
+3.4. Ngồi uống cà phê và xem log chạy
+
+================================================================================
+
+KẾT QUẢ MONG ĐỢI
+--------------------------------------------------------------------------------
+
+Terminal sẽ hiển thị:
+✓ Kết nối Supabase thành công
+✓ Đọc được X brands từ brands.txt
+✓ Tạo session cho lamthaocosmetics
+✓ Tạo session cho thegioiskinfood
+✓ [1/X] Đang xử lý brand: CeraVe
+✓ Crawl được Y sản phẩm, lưu Z sản phẩm mới
+...
+
+Cuối cùng:
+- Báo cáo tổng kết
+- Số brands đã xử lý
+- Tổng sản phẩm crawl
+- Tổng sản phẩm lưu mới
+- Thời gian thực hiện
+
+Log chi tiết: logs/crawl_YYYY-MM-DD.log
+
+================================================================================
+
+TEST VỚI 1 BRAND
+--------------------------------------------------------------------------------
+
+Muốn test với 1 brand trước:
+
+1. Mở brands.txt
+2. Comment (#) tất cả brands khác
+3. Chỉ để 1 brand active
+4. Chạy: uv run python main_pipeline.py
+
+VD file brands.txt khi test:
+   # Brand Filter Configuration
+   
+   CeraVe
+   #Cocoon
+   #Cetaphil
+   ...
+
+================================================================================
+
+XEM DỮ LIỆU ĐÃ CRAWL
+--------------------------------------------------------------------------------
+
+1. Truy cập Supabase Dashboard
+2. Vào Table Editor
+3. Chọn schema "raw"
+4. Xem bảng "product_api"
+5. Xem data JSON trong cột "data"
+
+Hoặc query SQL:
+   SELECT * FROM raw.product_api 
+   WHERE source_name = 'lamthaocosmetics' 
+   ORDER BY created_at DESC 
+   LIMIT 10;
+
+================================================================================
+
+CÂU HỎI THƯỜNG GẶP
+--------------------------------------------------------------------------------
+
+Q: Mất bao lâu để crawl?
+A: ~15-20 phút cho 20 brands (tuỳ số sản phẩm)
+
+Q: Có bị block không?
+A: Không, có delay hợp lý giữa các request
+
+Q: Chạy nhiều lần có duplicate không?
+A: Không, database tự động loại duplicate
+
+Q: Muốn crawl thêm brands?
+A: Thêm vào brands.txt, chạy lại pipeline
+
+Q: Muốn crawl lại toàn bộ?
+A: Chạy lại pipeline, nó sẽ tạo session mới
+
+================================================================================
+
+LƯU Ý
+--------------------------------------------------------------------------------
+
+- Chạy trong giờ hành chính để tránh làm quá tải server
+- Không chạy quá nhiều lần liên tục
+- Kiểm tra logs nếu có lỗi
+- Đảm bảo internet ổn định
+
+================================================================================
+
+DONE! Enjoy crawling!
+
+Đọc thêm chi tiết:
+- HUONG_DAN.txt      → Hướng dẫn chi tiết
+- TONG_QUAN_DU_AN.txt → Kiến trúc và tổng quan
+
+================================================================================
+

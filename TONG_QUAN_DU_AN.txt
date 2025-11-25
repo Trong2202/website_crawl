@@ -1,0 +1,220 @@
+================================================================================
+PIPELINE CRAWL DỮ LIỆU MỸ PHẨM - TỔNG QUAN DỰ ÁN
+================================================================================
+
+I. KIẾN TRÚC DỰ ÁN
+================================================================================
+
+1. CẤU TRÚC FILE CHÍNH:
+
+   main_pipeline.py          → Chương trình chính chạy toàn bộ pipeline
+   crawl_brands.py           → Crawl danh sách brands (chạy riêng để tra cứu)
+   crawl_products.py         → Logic crawl sản phẩm
+   config.py                 → Cấu hình toàn hệ thống
+
+2. MODULES HỖ TRỢ:
+
+   utils/
+   ├── logger.py             → Logging system (terminal + file)
+   └── helpers.py            → Utilities (request, parse, delay, retry...)
+
+   database/
+   └── database_handler.py   → Tương tác với Supabase
+
+3. FILE CẤU HÌNH:
+
+   brands.txt                → Danh sách brands cần crawl
+   .env                      → Thông tin Supabase (secret)
+   .envexample               → Template file .env
+   database.sql              → Schema database Supabase
+
+4. FILE HƯỚNG DẪN:
+
+   HUONG_DAN.txt             → Hướng dẫn sử dụng chi tiết
+   TONG_QUAN_DU_AN.txt       → File này - tổng quan dự án
+
+================================================================================
+II. LUỒNG XỬ LÝ PIPELINE
+================================================================================
+
+STEP 1: KHỞI TẠO
+   - Đọc cấu hình từ config.py và .env
+   - Kết nối Supabase database
+   - Đọc danh sách brands từ brands.txt
+
+STEP 2: TẠO SESSION
+   - Tạo crawl session cho mỗi website
+   - Session tracking để quản lý từng lần crawl
+   - Ghi log thời gian bắt đầu
+
+STEP 3: CRAWL BRANDS (Optional)
+   - Chạy crawl_brands.py để xem tất cả brands
+   - Website 1: lamthaocosmetics.vn/collections/all
+   - Website 2: thegioiskinfood.com/pages/thuong-hieu
+   - Output: all_brands.json
+
+STEP 4: CRAWL SẢN PHẨM
+   Với mỗi brand trong brands.txt:
+   
+   A. Website 1: lamthaocosmetics.vn
+      URL: /collections/vendors?q={brand}
+      → Tìm tất cả product elements
+      → Parse: tên, giá, link, category, số bán...
+      → Delay 1.5s
+   
+   B. Website 2: thegioiskinfood.com
+      URL: /collections/{brand}
+      → Tìm tất cả product elements
+      → Parse: tên, giá, link, category, số bán...
+      → Delay 1.5s
+
+STEP 5: LƯU DATABASE
+   - Format data thành JSONB
+   - Insert vào bảng product_api
+   - Auto-deduplication bởi trigger (product_id, price, bought)
+   - Chỉ lưu nếu có thay đổi
+
+STEP 6: HOÀN TẤT
+   - Complete session với status
+   - Tính toán thống kê
+   - In báo cáo tổng kết
+   - Ghi log chi tiết
+
+================================================================================
+III. SCHEMA DATABASE (raw.product_api)
+================================================================================
+
+Cấu trúc bảng product_api:
+
+   id                 BIGSERIAL PRIMARY KEY
+   product_id         VARCHAR(100)        → ID sản phẩm (từ URL)
+   session_id         UUID                → Link tới crawl_sessions
+   source_name        VARCHAR(100)        → Tên website
+   data               JSONB               → Dữ liệu sản phẩm đầy đủ
+   price              NUMERIC             → Giá hiện tại (auto extract)
+   bought             INTEGER             → Số đã bán (auto extract)
+   created_at         TIMESTAMPTZ         → Thời gian crawl
+
+   UNIQUE (product_id, price, bought)     → Chặn duplicate
+
+Format JSONB trong data:
+{
+  "name": "Tên sản phẩm",
+  "brand": {
+    "id": 0,
+    "name": "Brand Name"
+  },
+  "url": "https://...",
+  "price": 250000,
+  "market_price": 300000,
+  "bought": 150,
+  "discount_percent": 16.67,
+  "category": "Danh mục sản phẩm"
+}
+
+================================================================================
+IV. TÍNH NĂNG NỔI BẬT
+================================================================================
+
+1. AUTO-RETRY:
+   - Tự động retry 3 lần khi request fail
+   - Exponential backoff (2s, 4s, 8s)
+   - Handle timeout và connection errors
+
+2. SMART DELAY:
+   - 1.5s giữa các request
+   - 3s giữa các brand
+   - Tránh bị block/spam
+
+3. ROBUST ERROR HANDLING:
+   - Try-catch ở mọi cấp độ
+   - Log chi tiết lỗi
+   - Tiếp tục crawl khi gặp lỗi sản phẩm đơn lẻ
+   - Báo cáo brands thất bại
+
+4. LOGGING SYSTEM:
+   - Log ra terminal với màu sắc
+   - Log vào file logs/crawl_YYYY-MM-DD.log
+   - Rotate daily, giữ 30 ngày
+   - Auto compress log cũ
+
+5. AUTO-DEDUPLICATION:
+   - Database trigger tự động check duplicate
+   - Chỉ insert khi (product_id, price, bought) thay đổi
+   - Không cần logic phức tạp ở application layer
+
+6. FLEXIBLE PARSING:
+   - Thử nhiều CSS selector khác nhau
+   - Parse HTML linh hoạt với BeautifulSoup
+   - Xử lý nhiều cấu trúc HTML khác nhau
+
+================================================================================
+V. CÁC LỆNH QUAN TRỌNG
+================================================================================
+
+1. Cài đặt dependencies:
+   uv sync
+
+2. Crawl danh sách brands (tra cứu):
+   uv run python crawl_brands.py
+
+3. Chạy pipeline chính:
+   uv run python main_pipeline.py
+
+4. Test với 1 brand:
+   - Sửa brands.txt chỉ để 1 brand
+   - uv run python main_pipeline.py
+
+================================================================================
+VI. XỬ LÝ LỖI THƯỜNG GẶP
+================================================================================
+
+LỖI: "Không kết nối được Supabase"
+→ Kiểm tra file .env có đúng SUPABASE_URL và SUPABASE_KEY
+
+LỖI: "Không tìm thấy file brands.txt"
+→ Đảm bảo file brands.txt có trong thư mục gốc
+
+LỖI: "Timeout khi request"
+→ Tăng config.TIMEOUT trong config.py
+
+LỖI: "Không parse được sản phẩm"
+→ Cấu trúc HTML có thể đã thay đổi
+→ Cần update CSS selector trong crawl_products.py
+
+LỖI: "Bị block/429"
+→ Tăng config.REQUEST_DELAY (VD: 2.0 hoặc 3.0 seconds)
+
+================================================================================
+VII. KẾ HOẠCH MỞ RỘNG
+================================================================================
+
+Dễ dàng thêm website mới:
+1. Thêm URL vào config.py (WEBSITE_3_...)
+2. Thêm method parse trong crawl_products.py
+3. Update crawl logic trong ProductsCrawler
+4. Không cần thay đổi database schema
+
+Thêm thông tin crawl:
+1. Update parse methods để extract thêm field
+2. Thêm vào JSONB data object
+3. Database tự động lưu (JSONB linh hoạt)
+
+================================================================================
+VIII. PERFORMANCE
+================================================================================
+
+Ước tính thời gian:
+- 1 brand: ~10-30 sản phẩm
+- Thời gian/brand: ~30-60 giây
+- 20 brands: ~15-20 phút
+- Tuỳ thuộc vào số lượng sản phẩm mỗi brand
+
+Tối ưu:
+- Sử dụng lxml parser (nhanh hơn html.parser)
+- Batch insert vào database
+- Delay hợp lý để không bị block
+- Async/concurrent (có thể thêm sau nếu cần)
+
+================================================================================
+

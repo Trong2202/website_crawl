@@ -1,0 +1,65 @@
+name: Website Crawler
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # Chạy hàng ngày lúc 2:00 UTC (9:00 GMT+7)
+  workflow_dispatch:
+    inputs:
+      website:
+        description: 'Website để crawl (guardian/skinfood/all)'
+        required: false
+        default: 'all'
+      max_products:
+        description: 'Số lượng sản phẩm tối đa'
+        required: false
+        default: ''
+      max_pages:
+        description: 'Số trang tối đa'
+        required: false
+        default: '10'
+
+jobs:
+  crawl:
+    name: Crawl Product & Review Data
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install UV
+        uses: astral-sh/setup-uv@v2
+        with:
+          enable-cache: true
+          cache-dependency-glob: "website_crawl/uv.lock"
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        working-directory: website_crawl
+        run: uv sync
+      
+      - name: Run parallel crawler
+        working-directory: website_crawl
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SUPABASE_SCHEMA: raw
+        run: |
+          ARGS="--website ${{ github.event.inputs.website || 'all' }} --max-pages ${{ github.event.inputs.max_pages || '10' }} --workers 10"
+          if [ -n "${{ github.event.inputs.max_products }}" ]; then
+            ARGS="$ARGS --max-products ${{ github.event.inputs.max_products }}"
+          fi
+          uv run main.py $ARGS
+      
+      - name: Notify on failure
+        if: failure()
+        run: echo "Crawler thất bại! Kiểm tra logs để biết chi tiết."
+      
+      - name: Summary
+        if: success()
+        run: echo "Crawler hoàn tất thành công!"
+
