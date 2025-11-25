@@ -1,47 +1,28 @@
-name: Website Crawler
+name: Daily Crawler
 
 on:
   schedule:
-    - cron: '30 19 * * *'  # 2:30 UTC daily
-  workflow_dispatch:  # Cho phép chạy thủ công
+    - cron: '30 19 * * *'
+  workflow_dispatch:
 
 jobs:
   crawl:
-    name: Crawl Products
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
     
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       
-      - name: Setup UV
-        uses: astral-sh/setup-uv@v2
+      - uses: astral-sh/setup-uv@v2
         with:
           enable-cache: true
-          cache-dependency-glob: "website_crawl/uv.lock"
-      
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version-file: 'website_crawl/.python-version'
       
       - name: Install dependencies
-        working-directory: website_crawl
         run: uv sync --frozen
       
       - name: Run crawler
-        working-directory: website_crawl
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           SUPABASE_SCHEMA: raw
         run: uv run main_pipeline.py
-      
-      - name: Upload logs on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: crawler-logs
-          path: website_crawl/logs/
-          retention-days: 7

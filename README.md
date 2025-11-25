@@ -122,14 +122,3 @@ Logs được lưu tự động vào thư mục `logs/`:
 - Không chạy quá nhiều lần liên tục để tránh bị block
 - Check logs nếu có lỗi
 
-## Hỗ trợ
-
-Đọc thêm chi tiết:
-- `QUICK_START.txt` - Hướng dẫn nhanh 3 bước
-- `HUONG_DAN.txt` - Hướng dẫn chi tiết
-- `TONG_QUAN_DU_AN.txt` - Kiến trúc kỹ thuật
-
----
-
-**Chúc bạn crawl thành công!** 🎉
-
