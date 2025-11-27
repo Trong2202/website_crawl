@@ -16,9 +16,8 @@ Simple
 Garnier
 Rosette
 SVR
-Cocoon
 Huxley
 Caryophy
-o'Natural
+#o'Natural
 
 
