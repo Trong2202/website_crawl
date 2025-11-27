@@ -6,19 +6,19 @@ CeraVe
 Cocoon
 Cetaphil
 La Roche-Posay
-#L'Oreal
-#Paula's Choice
-#St.Ives
-#Bioderma
-#Eucerin
-#CeraVe
-#Simple
-#Garnier
-#Rosette
-#SVR
-#Cocoon
-#Huxley
-#Caryophy
-#o'Natural
+L'Oreal
+Paula's Choice
+St.Ives
+Bioderma
+Eucerin
+CeraVe
+Simple
+Garnier
+Rosette
+SVR
+Cocoon
+Huxley
+Caryophy
+o'Natural
 
 

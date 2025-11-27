@@ -1,7 +1,3 @@
-"""
-Main Pipeline - Crawl sản phẩm mỹ phẩm theo brands và lưu vào Supabase
-Chạy: uv run python main_pipeline.py
-"""
 import sys
 import re
 import uuid
