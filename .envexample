@@ -3,9 +3,15 @@ SUPABASE_URL=your_supabase_url_here
 SUPABASE_KEY=your_supabase_anon_key_here
 SUPABASE_SCHEMA=raw
 
-# Target Websites
-WEBSITE_1=https://lamthaocosmetics.vn/collections/vendors?q={brand}
-WEBSITE_2=https://thegioiskinfood.com/collections/{brand}
-#Brands
+
+# Brands
 WEBSITE_BRANDS_1 = https://lamthaocosmetics.vn/collections/all
 WEBSITE_BRANDS_2= https://thegioiskinfood.com/pages/thuong-hieu
+# Target Websites
+WEBSITE_1=https://lamthaocosmetics.vn/collections/vendors?q={brand}&page={page}
+WEBSITE_2=https://thegioiskinfood.com/collections/{brand}
+# Product
+PRODUCT_1 = https://lamthaocosmetics.vn{url}
+PRODUCT_2 = https://thegioiskinfood.com{url}
+# Comment thegioiskinfood
+REVIEW2_API = https://customer-reviews-api.haravan.app/api/buyer/product_rating?org_id=1000006063&product_id={id}&page={page}&limit=10&source_cr_at=desc&v=1762834510562

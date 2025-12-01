@@ -1,23 +1,24 @@
+"""
+Optimized Main Pipeline with Async/Concurrent Processing
+HYBRID: Quick wins + Async concurrent crawling
+"""
 import sys
-import re
-import uuid
+import asyncio
 from datetime import datetime
-from typing import List, Dict, Any
-from urllib.parse import urljoin
-
-from bs4 import BeautifulSoup
+from typing import Dict
+import uuid
 
 from utils.logger import get_logger
-from utils.helpers import (
-    read_brands_from_file,
-    delay_request,
-    make_request,
-    parse_html,
-    normalize_brand_name,
-    format_price,
-    extract_bought_value,
-)
+from utils.helpers import read_brands_from_file
+from utils.async_helpers import close_session
 from database.database_handler import DatabaseHandler
+from crawlers import (
+    crawl_listing_lamthaocosmetics,
+    crawl_listing_thegioiskinfood,
+    crawl_reviews_thegioiskinfood,
+)
+from crawlers.async_product_crawler import crawl_products_concurrent
+from crawlers.async_review_crawler import crawl_reviews_thegioiskinfood_async
 import config
 
 logger = get_logger()
@@ -26,229 +27,249 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
 
-def build_product_id(source_name: str, url: str) -> str:
-    """Sinh product_id dựa trên URL (tự động nếu thiếu)."""
-    clean_url = (url or "").split("?")[0].rstrip("/")
-    slug = clean_url.split("/")[-1] if clean_url else ""
-    slug = re.sub(r"[^a-zA-Z0-9\-]+", "-", slug).strip("-")
-    if not slug:
-        slug = uuid.uuid4().hex[:10]
-    product_id = f"{source_name}-{slug}".lower()
-    if len(product_id) > 100:
-        max_slug_len = max(1, 100 - len(source_name) - 1)
-        slug = slug[:max_slug_len].rstrip("-")
-        product_id = f"{source_name}-{slug}".lower()
-    return product_id
-
-
-def text_or_empty(element: BeautifulSoup) -> str:
-    if not element:
-        return ""
-    return " ".join(element.stripped_strings)
-
-
-def extract_lamthaocosmetics_products(soup: BeautifulSoup, brand: str) -> List[Dict[str, Any]]:
-    products = []
-    for card in soup.select("div.product-inner"):
-        title_link = card.select_one("h3.titleproduct a")
-        if not title_link:
-            continue
-
-        relative_url = title_link.get("href", "").strip()
-        url = urljoin(config.WEBSITE_1_BASE, relative_url)
-        name = title_link.get_text(strip=True)
-        if not url or not name:
-            continue
-
-        price_text = text_or_empty(card.select_one("span.price-del"))
-        price_sale_text = text_or_empty(card.select_one("span.price"))
-        bought_text = text_or_empty(card.select_one("div.bottomloopend21"))
-
-        price_value = int(format_price(price_text)) if price_text else 0
-        price_sale_value = int(format_price(price_sale_text)) if price_sale_text else 0
-        bought_value = extract_bought_value(bought_text)
-
-        product = {
-            "product_id": build_product_id(config.WEBSITE_1_NAME, url),
-            "source_name": config.WEBSITE_1_NAME,
-            "data": {
-                "brand": brand,
-                "category": "",
-                "name": name,
-                "price_text": price_text,
-                "price": price_value,
-                "price_sale_text": price_sale_text,
-                "price_sale": price_sale_value,
-                "bought_text": bought_text,
-                "bought": bought_value,
-                "url": url,
-            },
-        }
-        products.append(product)
-    return products
-
-
-def extract_thegioiskinfood_products(soup: BeautifulSoup, brand: str) -> List[Dict[str, Any]]:
-    products = []
-    for card in soup.select("div.proLoop"):
-        title_link = card.select_one("p.productName a")
-        if not title_link:
-            continue
-
-        relative_url = title_link.get("href", "").strip()
-        url = urljoin(config.WEBSITE_2_BASE, relative_url)
-        name = title_link.get_text(strip=True)
-        if not url or not name:
-            continue
-
-        brand_text = text_or_empty(card.select_one(".loopvendor .fill-vendor")) or brand
-        price_text = text_or_empty(card.select_one("p.productPrice del"))
-        price_sale_text = text_or_empty(card.select_one("p.productPrice b"))
-        bought_text = text_or_empty(card.select_one(".productLoop-sold-qtt"))
-
-        price_value = int(format_price(price_text)) if price_text else 0
-        price_sale_value = int(format_price(price_sale_text)) if price_sale_text else 0
-        bought_value = extract_bought_value(bought_text)
-
-        product = {
-            "product_id": build_product_id(config.WEBSITE_2_NAME, url),
-            "source_name": config.WEBSITE_2_NAME,
-            "data": {
-                "brand": brand_text,
-                "category": "",
-                "name": name,
-                "price_text": price_text,
-                "price": price_value,
-                "price_sale_text": price_sale_text,
-                "price_sale": price_sale_value,
-                "bought_text": bought_text,
-                "bought": bought_value,
-                "url": url,
-            },
-        }
-        products.append(product)
-    return products
-
-
-def crawl_brand_products(brand: str, db_handler: DatabaseHandler, sessions: Dict[str, uuid.UUID]) -> Dict[str, int]:
-    stats = {"crawled": 0, "saved": 0}
-    brand_normalized = normalize_brand_name(brand)
-
+async def crawl_brand_all_steps_async(brand: str, db: DatabaseHandler, sessions: Dict[str, uuid.UUID]) -> Dict[str, int]:
+    """
+    Async version: Crawl all steps for one brand with concurrent product processing
+    
+    Args:
+        brand: Brand name
+        db: Database handler
+        sessions: Session IDs dict
+        
+    Returns:
+        Statistics dict
+    """
+    stats = {
+        "listings_1": 0,
+        "listings_2": 0,
+        "products_1": 0,
+        "products_2": 0,
+        "reviews": 0,
+    }
+    
+    logger.info(f"\n{'=' * 80}")
+    logger.info(f"Brand: {brand}")
+    logger.info(f"{'=' * 80}")
+    
+    # ========================================
+    # STEP 2: Get Listings from DB (Skip Crawl)
+    # ========================================
+    logger.info(f"\n[STEP 2] Get Listings from DB: {brand}")
+    
     # Website 1
     try:
-        url_1 = config.WEBSITE_1_PRODUCTS.format(brand=brand_normalized)
-        logger.info(f"Crawl {brand} từ {config.WEBSITE_1_NAME}: {url_1}")
-        response = make_request(url_1)
-        if response:
-            soup = parse_html(response.text)
-            if soup:
-                products = extract_lamthaocosmetics_products(soup, brand)
-                logger.info(f"{config.WEBSITE_1_NAME}: tìm thấy {len(products)} sản phẩm")
-                for product in products:
-                    stats["crawled"] += 1
-                    if db_handler.insert_product(sessions[config.WEBSITE_1_NAME], product):
-                        stats["saved"] += 1
-        delay_request()
+        # listings_1 = crawl_listing_lamthaocosmetics(brand, sessions[config.WEBSITE_1_NAME], db)
+        listings_1 = db.get_listings_by_brand(config.WEBSITE_1_NAME, brand)
+        stats["listings_1"] = len(listings_1)
+        logger.info(f"Found {len(listings_1)} listings for W1 in DB")
     except Exception as exc:
-        logger.error(f"Lỗi crawl {brand} từ {config.WEBSITE_1_NAME}: {exc}")
-
+        logger.error(f"Error getting listings W1: {exc}")
+        listings_1 = []
+    
     # Website 2
     try:
-        url_2 = config.WEBSITE_2_PRODUCTS.format(brand=brand_normalized)
-        logger.info(f"Crawl {brand} từ {config.WEBSITE_2_NAME}: {url_2}")
-        response = make_request(url_2)
-        if response:
-            soup = parse_html(response.text)
-            if soup:
-                products = extract_thegioiskinfood_products(soup, brand)
-                logger.info(f"{config.WEBSITE_2_NAME}: tìm thấy {len(products)} sản phẩm")
-                for product in products:
-                    stats["crawled"] += 1
-                    if db_handler.insert_product(sessions[config.WEBSITE_2_NAME], product):
-                        stats["saved"] += 1
-        delay_request()
+        # listings_2 = crawl_listing_thegioiskinfood(brand, sessions[config.WEBSITE_2_NAME], db)
+        listings_2 = db.get_listings_by_brand(config.WEBSITE_2_NAME, brand)
+        stats["listings_2"] = len(listings_2)
+        logger.info(f"Found {len(listings_2)} listings for W2 in DB")
     except Exception as exc:
-        logger.error(f"Lỗi crawl {brand} từ {config.WEBSITE_2_NAME}: {exc}")
-
+        logger.error(f"Error getting listings W2: {exc}")
+        listings_2 = []
+    
+    logger.success(f"[STEP 2] Total listings from DB: {stats['listings_1']} (W1) + {stats['listings_2']} (W2)")
+    
+    # ========================================
+    # STEP 3: Crawl Products CONCURRENTLY
+    # ========================================
+    logger.info(f"\n[STEP 3] Crawl Products (CONCURRENT)")
+    
+    # Process both websites concurrently
+    tasks = []
+    
+    if listings_1:
+        tasks.append(crawl_products_concurrent(
+            listings_1,
+            sessions[config.WEBSITE_1_NAME],
+            db,
+            config.WEBSITE_1_NAME
+        ))
+    
+    if listings_2:
+        tasks.append(crawl_products_concurrent(
+            listings_2,
+            sessions[config.WEBSITE_2_NAME],
+            db,
+            config.WEBSITE_2_NAME
+        ))
+    
+    if tasks:
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                logger.error(f"Product crawl error: {result}")
+            else:
+                if i == 0 and listings_1:  # W1
+                    stats["products_1"] = result.get("products", 0)
+                elif i == (1 if listings_1 else 0) and listings_2:  # W2
+                    stats["products_2"] = result.get("products", 0)
+                    
+                    # STEP 4: Crawl Reviews for W2 products
+                    if "results" in result:
+                        semaphore = asyncio.Semaphore(config.MAX_CONCURRENT_REQUESTS)
+                        review_tasks = []
+                        
+                        for product_result in result["results"]:
+                            if product_result and product_result.get('id'):
+                                review_tasks.append(
+                                    crawl_reviews_thegioiskinfood_async(
+                                        product_result['id'],
+                                        product_result['product_id'],
+                                        sessions[config.WEBSITE_2_NAME],
+                                        db,
+                                        semaphore
+                                    )
+                                )
+                        
+                        if review_tasks:
+                            logger.info(f"\n[STEP 4] Crawl Reviews (CONCURRENT)")
+                            review_results = await asyncio.gather(*review_tasks, return_exceptions=True)
+                            stats["reviews"] = sum(r for r in review_results if isinstance(r, int))
+    
+    logger.success(
+        f"[COMPLETE] {brand}: "
+        f"Products={stats['products_1']+stats['products_2']}, "
+        f"Reviews={stats['reviews']}"
+    )
+    
     return stats
 
 
-def run_pipeline():
+async def run_pipeline_async():
+    """Main async pipeline - Process brands with concurrency"""
     start_time = datetime.now()
     logger.info("=" * 80)
-    logger.info("BẮT ĐẦU CRAWL PIPELINE - MỸ PHẨM")
+    logger.info("OPTIMIZED ASYNC CRAWL PIPELINE - MỸ PHẨM")
+    logger.info("Features: Concurrent processing + Session reuse + Anti-block")
     logger.info("=" * 80)
-
+    
+    # Read brands
     brands = read_brands_from_file()
     if not brands:
-        logger.error("Không có brand nào để crawl")
+        logger.error("No brands to crawl")
         return
-
-    logger.info(f"Sẽ crawl {len(brands)} brands: {', '.join(brands)}")
-
+    
+    logger.info(f"Processing {len(brands)} brands with {config.MAX_CONCURRENT_REQUESTS} concurrent requests\n")
+    
+    # Initialize database
     db = DatabaseHandler()
     sessions = {}
     pipeline_failed = False
-
+    
+    # Create sessions
     try:
         sessions[config.WEBSITE_1_NAME] = db.create_session(config.WEBSITE_1_NAME)
         sessions[config.WEBSITE_2_NAME] = db.create_session(config.WEBSITE_2_NAME)
     except Exception:
-        logger.error("Không tạo được crawl session")
+        logger.error("Cannot create sessions")
         raise
-
-    total_crawled = 0
-    total_saved = 0
+    
+    # Statistics
+    total_stats = {
+        "listings_1": 0,
+        "listings_2": 0,
+        "products_1": 0,
+        "products_2": 0,
+        "reviews": 0,
+    }
     failed_brands = []
-
+    
+    # Crawl brands (with brand-level concurrency)
     try:
-        for idx, brand in enumerate(brands, 1):
-            logger.info(f"\n{'=' * 80}")
-            logger.info(f"[{idx}/{len(brands)}] Brand: {brand}")
-            logger.info(f"{'=' * 80}")
-            try:
-                stats = crawl_brand_products(brand, db, sessions)
-                total_crawled += stats["crawled"]
-                total_saved += stats["saved"]
-                logger.success(f"{brand}: Crawl {stats['crawled']}, lưu {stats['saved']} sản phẩm mới")
-            except Exception as exc:
-                failed_brands.append(brand)
-                logger.error(f"Lỗi xử lý brand {brand}: {exc}")
-
-            if idx < len(brands):
-                delay_request(config.REQUEST_DELAY * 2)
-
+        # Process brands in batches
+        brand_batch_size = config.MAX_CONCURRENT_BRANDS
+        
+        for batch_start in range(0, len(brands), brand_batch_size):
+            batch_brands = brands[batch_start:batch_start + brand_batch_size]
+            
+            logger.info(f"\n{'#' * 80}")
+            logger.info(f"Processing batch: {', '.join(batch_brands)}")
+            logger.info(f"{'#' * 80}")
+            
+            # Process brands in this batch concurrently
+            batch_tasks = [
+                crawl_brand_all_steps_async(brand, db, sessions)
+                for brand in batch_brands
+            ]
+            
+            batch_results = await asyncio.gather(*batch_tasks, return_exceptions=True)
+            
+            # Collect stats
+            for brand, result in zip(batch_brands, batch_results):
+                if isinstance(result, Exception):
+                    failed_brands.append(brand)
+                    logger.error(f"✗ {brand}: {result}")
+                else:
+                    for key in total_stats:
+                        total_stats[key] += result[key]
+                    
+                    logger.success(
+                        f"✓ {brand}: "
+                        f"Listings={result['listings_1']+result['listings_2']}, "
+                        f"Products={result['products_1']+result['products_2']}, "
+                        f"Reviews={result['reviews']}"
+                    )
+    
     except KeyboardInterrupt:
         pipeline_failed = True
-        logger.warning("\nNgười dùng dừng pipeline (Ctrl+C)")
+        logger.warning("\nUser stopped pipeline (Ctrl+C)")
         raise
     except Exception as exc:
         pipeline_failed = True
-        logger.error(f"Lỗi nghiêm trọng: {exc}")
+        logger.error(f"Critical error: {exc}")
         raise
     finally:
+        # Close async session
+        await close_session()
+        
+        # Complete sessions
         status = "failed" if pipeline_failed else "completed"
         for source_name, session_id in sessions.items():
             db.complete_session(session_id, status)
-
+    
+    # Report
     duration = datetime.now() - start_time
     print("\n" + "=" * 80)
-    print("BÁO CÁO TỔNG KẾT")
+    print("SUMMARY REPORT")
     print("=" * 80)
-    print(f"Thời gian: {duration}")
-    print(f"Brands xử lý: {len(brands)}")
-    print(f"Brands thất bại: {len(failed_brands)}")
-    print(f"Sản phẩm crawl: {total_crawled}")
-    print(f"Sản phẩm lưu mới: {total_saved}")
-    print(f"Duplicate bỏ qua: {total_crawled - total_saved}")
+    print(f"Duration: {duration}")
+    print(f"Brands processed: {len(brands)}")
+    print(f"Brands failed: {len(failed_brands)}")
+    print(f"\n📋 LISTINGS:")
+    print(f"  - Website 1: {total_stats['listings_1']}")
+    print(f"  - Website 2: {total_stats['listings_2']}")
+    print(f"  - Total: {total_stats['listings_1'] + total_stats['listings_2']}")
+    print(f"\n📦 PRODUCTS:")
+    print(f"  - Website 1: {total_stats['products_1']}")
+    print(f"  - Website 2: {total_stats['products_2']}")
+    print(f"  - Total: {total_stats['products_1'] + total_stats['products_2']}")
+    print(f"\n⭐ REVIEWS:")
+    print(f"  - Pages saved: {total_stats['reviews']}")
+    
     if failed_brands:
-        print(f"\nBrands thất bại: {', '.join(failed_brands)}")
+        print(f"\n⚠️  Failed brands: {', '.join(failed_brands)}")
+    
     print("=" * 80 + "\n")
-    logger.success("HOÀN THÀNH PIPELINE")
+    logger.success("ASYNC PIPELINE COMPLETED")
+
+
+def run_pipeline():
+    """Entry point - runs async pipeline"""
+    try:
+        asyncio.run(run_pipeline_async())
+    except KeyboardInterrupt:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
-    try:
-        run_pipeline()
-    except KeyboardInterrupt:
-        sys.exit(1)
+    run_pipeline()

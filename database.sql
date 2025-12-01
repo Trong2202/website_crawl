@@ -608,3 +608,45 @@ $$ LANGUAGE plpgsql;
 
 SELECT 'Schema raw with direct JSONB comparison created successfully!' as status;
 SELECT tablename FROM pg_tables WHERE schemaname = 'raw' ORDER BY tablename;
+
+ALTER TABLE raw.listing_api
+ADD COLUMN product_url TEXT;
+ADD COLUMN data JSONB;
+
+-- 1. Xóa trigger/function cũ nếu tồn tại
+DROP TRIGGER IF EXISTS trg_sync_product_url ON raw.listing_api;
+DROP FUNCTION IF EXISTS raw.sync_product_url_from_jsonb();
+
+-- 2. Tạo function trigger để tách data->>'url' vào product_url
+CREATE OR REPLACE FUNCTION raw.sync_product_url_from_jsonb()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  -- Nếu tồn tại key 'url' trong jsonb cột data
+  IF NEW.data IS NOT NULL AND NEW.data ? 'url' THEN
+    NEW.product_url := NULLIF(NEW.data->>'url', '');
+  ELSE
+    NEW.product_url := NULL;
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+-- 3. Tạo trigger chạy BEFORE INSERT/UPDATE
+CREATE TRIGGER trg_sync_product_url
+BEFORE INSERT OR UPDATE
+ON raw.listing_api
+FOR EACH ROW
+EXECUTE FUNCTION raw.sync_product_url_from_jsonb();
+
+-- 4. Cập nhật toàn bộ dữ liệu hiện có (nếu đã có data->'url')
+UPDATE raw.listing_api
+SET product_url = NULLIF(data->>'url', '')
+WHERE data IS NOT NULL
+  AND data ? 'url';
+
+-- 5. (Tùy) Tạo index để tìm kiếm nhanh product_url
+CREATE INDEX IF NOT EXISTS idx_raw_listing_api_product_url
+ON raw.listing_api (product_url);

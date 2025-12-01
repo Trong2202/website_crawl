@@ -1,0 +1,281 @@
+# FLOW PHÂN TÍCH DỮ LIỆU SẢN PHẨM
+
+## BƯỚC 1: Lấy danh sách Brands
+- **Input**: WEBSITE_BRANDS_1 hoặc WEBSITE_BRANDS_2
+- **Mục tiêu**: Parse HTML để lấy danh sách tất cả các thương hiệu
+- **Output**: List tên brands
+
+## BƯỚC 2: Lấy URL Products theo Brand
+- **Input**: Tên brand từ BƯỚC 1 → thay vào WEBSITE_1 hoặc WEBSITE_2
+- **Mục tiêu**: Parse HTML collection page để lấy URL của từng sản phẩm thuộc brand
+- **Output**: List URL sản phẩm (dạng `/products/ten-san-pham`)
+
+## BƯỚC 3: Lấy thông tin Product
+- **Input**: URL từ BƯỚC 2 → thay vào PRODUCT_1 hoặc PRODUCT_2
+- **Mục tiêu**: Parse HTML product page để lấy thông tin chi tiết 
+- **Output**: Object chứa thông tin sản phẩm + product_id
+
+## BƯỚC 4: Lấy Reviews (chỉ Website 2)
+- **Input**: product_id từ BƯỚC 3 → thay vào WEBSITE_2_REVIEW
+- **Mục tiêu**: Gọi API lấy đánh giá khách hàng (loop qua các page)
+- **Output**: List reviews
+
+
+
+# ============================================
+# LAMTHAOCOSMETICS - Bước 2 (Collection Page)
+# ============================================
+{
+  "id": 1067440535,
+  "sku": null,
+  "name": "Sữa Rửa Mặt Kiểm Soát Nhờn Hỗ Trợ Giảm Mụn Cerave Blemish Control Cleanser",
+  "url": "/products/sua-rua-mat-kiem-soat-nhon-ho-tro-giam-mun-cerave-blemish-control-cleanser",
+  "brand": {
+    "name": "Cerave"
+  },
+}
+
+# ============================================
+# LAMTHAOCOSMETICS - Bước 3 (Product Detail)
+# ============================================
+{
+  "id": 1054065607,
+  "sku": null,
+  "name": "Gel Rửa Mặt Cho Da Dầu Mụn Laboratorios BABE Stop AKN Purifying Cleansing Gel",
+  "url": "gel-rua-mat-cho-da-dau-mun-laboratorios-babe-stop-akn-purifying-cleansing-gel",
+  "brand": {
+    "name": "Laboratorios BABE"
+  },
+  "category_name": "Sữa Rửa Mặt",
+  "price": 223000,
+  "final_price": "223.000 ₫",
+  "market_price": "279.000 ₫",
+  "price": 223000,
+  "discount_market_percent": -20,
+  "bought": 4425,
+  "can_buy": true,
+  "is_saleable": true,
+  "variant": {
+    "has_variants": true,
+    "options": ["Dung Tích"],
+    "variants": [
+      {
+        "id": 1121595323,
+        "title": "100ml",
+        "sku": "8437011329875",
+        "barcode": "8437011329875",
+        "available": true,
+        "price": 223000,
+        "final_price": "223.000 ₫",
+        "market_price": "279.000 ₫",
+        "int_final_price": 223000,
+        "qty": 1,
+        "old_qty": 3
+      },
+      {
+        "id": 1147078788,
+        "title": "200ml",
+        "sku": "8437014389302",
+        "barcode": "8437014389302",
+        "available": false,
+        "price": 343000,
+        "final_price": "343.000 ₫",
+        "market_price": "429.000 ₫",
+        "int_final_price": 343000,
+        "qty": 0,
+        "old_qty": 1
+      },
+      {
+        "id": 1156503587,
+        "title": "200ml (Mẫu Mới)",
+        "sku": "8436571632272",
+        "barcode": "8436571632272",
+        "available": true,
+        "price": 343000,
+        "final_price": "343.000 ₫",
+        "market_price": "429.000 ₫",
+        "int_final_price": 343000,
+        "qty": 116,
+        "old_qty": 224
+      }
+    ]
+  }
+}
+
+# ============================================
+# THEGIOISKINFOOD - Bước 2 (Collection Page)
+# ============================================
+{
+  "id": 1056388763,
+  "sku": null,
+  "name": "[HOT] Sữa Rửa Mặt Sạch Sâu Da Dầu Cerave Developed With Dermatologists Foaming Cleanser 30ML",
+  "url": "/products/hot-sua-rua-mat-sach-sau-da-dau-cerave-developed-with-dermatologists-foaming-cleanser-30ml",
+  "brand": {
+    "name": "CERAVE",
+    "url": "/collections/all?vendors=CERAVE"
+  }
+}
+# ============================================
+# THEGIOISKINFOOD - Bước 3 (Product Detail)
+# ============================================
+{
+  "id": 1043504950,
+  "sku": null,
+  "name": "[VE-EASY] Phấn Nước Trang Điểm Romand Che Phủ Tự Nhiên, Căng Bóng Thuần Chay Bare Water Cushion SPF38/PA++++ 20g",
+  "url": "phan-nuoc-trang-diem-cang-bong-thuan-chay-romand-bare-water-cushion",
+  "brand": {
+    "name": "Romand"
+  },
+  "price": 369000,
+  "final_price": "369.000₫",
+  "market_price": "730.000₫",
+  "discount_market_percent": -49,
+  "bought": 667,
+  "can_buy": true,
+  "is_saleable": true,
+  "variant": {
+    "has_variants": true,
+    "options": ["Tiêu đề"],
+    "variants": [
+      {
+        "id": 1095513712,
+        "title": "01 PORCELAIN17",
+        "sku": "8809625246266",
+        "barcode": "8809625246266",
+        "available": true,
+        "price": 369000,
+        "final_price": "369.000₫",
+        "qty": 999,
+        "max_order": 2
+      },
+      {
+        "id": 1098061405,
+        "title": "02 PURE21",
+        "sku": "8809625246273",
+        "barcode": "8809625246273",
+        "available": true,
+        "price": 369000,
+        "final_price": "369.000₫",
+        "int_final_price": 369000,
+        "qty": 999,
+        "max_order": 6
+      },
+      {
+        "id": 1098061416,
+        "title": "03 NATURAL21",
+        "sku": "8809625246280",
+        "barcode": "8809625246280",
+        "available": true,
+        "price": 369000,
+        "final_price": "369.000₫",
+        "int_final_price": 369000,
+        "qty": 999,
+        "max_order": 10
+      },
+      {
+        "id": 1098061419,
+        "title": "04 BEIGE23",
+        "sku": "8809625246297",
+        "barcode": "8809625246297",
+        "available": true,
+        "price": 369000,
+        "final_price": "369.000₫",
+        "int_final_price": 369000,
+        "qty": 999,
+        "max_order": 2
+      },
+      {
+        "id": 1098061466,
+        "title": "05 SAND25",
+        "sku": "8809625246303",
+        "barcode": "8809625246303",
+        "available": true,
+        "price": 369000,
+        "final_price": "369.000₫",
+        "int_final_price": 369000,
+        "qty": 999,
+        "max_order": 2
+      },
+      {
+        "id": 1098068383,
+        "title": "01 PORCELAIN17 (LÕI THAY THẾ)",
+        "sku": "8809625246358",
+        "barcode": "8809625246358",
+        "available": true,
+        "price": 234000,
+        "final_price": "234.000₫",
+        "int_final_price": 234000,
+        "qty": 999,
+        "max_order": 2
+      },
+      {
+        "id": 1098068390,
+        "title": "02 PURE21 (LÕI THAY THẾ)",
+        "sku": "8809625246341",
+        "barcode": "8809625246341",
+        "available": true,
+        "price": 234000,
+        "final_price": "234.000₫",
+        "int_final_price": 234000,
+        "qty": 999,
+        "max_order": 1
+      },
+      {
+        "id": 1098068397,
+        "title": "03 NATURAL21 (LÕI THAY THẾ)",
+        "sku": "8809625246334",
+        "barcode": "8809625246334",
+        "available": true,
+        "price": 234000,
+        "final_price": "234.000₫",
+        "qty": 999,
+        "max_order": 2
+      },
+      {
+        "id": 1159403199,
+        "title": "04 BEIGE23 (LÕI THAY THẾ)",
+        "sku": "8809625246327",
+        "barcode": "8809625246327",
+        "available": false,
+        "price": 234000,
+        "final_price": "234.000₫",
+        "qty": 999,
+        "max_order": 0
+      },
+      {
+        "id": 1098068468,
+        "title": "05 SAND25 (LÕI THAY THẾ)",
+        "sku": "8809625246310",
+        "barcode": "8809625246310",
+        "available": true,
+        "price": 234000,
+        "final_price": "234.000₫",
+        "qty": 999,
+        "max_order": 2
+      },
+      {
+        "id": 1159403111,
+        "title": "05 SAND25 (date 09/2026)",
+        "sku": "8809625246303SP04",
+        "barcode": "8809625246303SP04",
+        "available": true,
+        "price": 207000,
+        "final_price": "207.000₫",
+        "": 207000,
+        "qty": 999,
+        "max_order": 5
+      },
+      {
+        "id": 1159403312,
+        "title": "[BUFFET] 04 BEIGE23 (LÕI THAY THẾ) (date 09/2026)",
+        "sku": "8809625246327SP03",
+        "barcode": "8809625246327SP03",
+        "available": false,
+        "price": 131000,
+        "final_price": "131.000₫",
+        "qty": 999,
+        "max_order": 0
+      }
+    ]
+  }
+}
