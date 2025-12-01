@@ -609,6 +609,10 @@ $$ LANGUAGE plpgsql;
 SELECT 'Schema raw with direct JSONB comparison created successfully!' as status;
 SELECT tablename FROM pg_tables WHERE schemaname = 'raw' ORDER BY tablename;
 
+
+
+
+-- Bổ sung listing_api
 ALTER TABLE raw.listing_api
 ADD COLUMN product_url TEXT;
 ADD COLUMN data JSONB;

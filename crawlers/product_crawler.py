@@ -58,9 +58,10 @@ def transform_lamthao_json(raw_json: Dict, bought_count: int = 0) -> Dict:
         "is_saleable": raw_json.get("available", False),
     }
     
-    # Variants nếu có nhiều hơn 1
+    # Variants processing
     variants = raw_json.get("variants", [])
     if variants and len(variants) > 1:
+        # Sản phẩm có nhiều variants
         transformed_variants = []
         for v in variants:
             v_price = int(v.get("price", 0) / 100)
@@ -75,7 +76,6 @@ def transform_lamthao_json(raw_json: Dict, bought_count: int = 0) -> Dict:
                 "price": v_price,
                 "final_price": format_price_vnd(v_price * 100, "lamthaocosmetics"),
                 "market_price": format_price_vnd(v_compare * 100, "lamthaocosmetics"),
-                "int_final_price": v_price,
                 "qty": int(v.get("inventory_quantity", 0)),
                 "old_qty": int(v.get("old_inventory_quantity", 0))
             }
@@ -86,6 +86,12 @@ def transform_lamthao_json(raw_json: Dict, bought_count: int = 0) -> Dict:
             "options": raw_json.get("options", []),
             "variants": transformed_variants
         }
+    elif variants and len(variants) == 1:
+        # Sản phẩm đơn (chỉ 1 variant): hoist variant fields lên product-level
+        single_variant = variants[0]
+        result["sku"] = single_variant.get("sku")
+        result["qty"] = int(single_variant.get("inventory_quantity", 0))
+        result["old_qty"] = int(single_variant.get("old_inventory_quantity", 0))
     
     return result
 
@@ -143,6 +149,7 @@ def parse_thegioiskinfood_html(soup: BeautifulSoup, product_id: str, product_url
     # Variants - parse từ select options
     variant_select = soup.select("#product-select option")
     if variant_select and len(variant_select) > 1:
+        # Sản phẩm có nhiều variants
         options_raw = soup.select(".single-option-selector option")
         option_name = "Tiêu đề"  # Default
         
@@ -169,7 +176,6 @@ def parse_thegioiskinfood_html(soup: BeautifulSoup, product_id: str, product_url
                 "available": is_available,
                 "price": variant_price,
                 "final_price": format_price_vnd(variant_price, "thegioiskinfood"),
-                "int_final_price": variant_price,
                 "qty": int(variant_max) if variant_max.isdigit() else 999,
                 "max_order": int(variant_max_order) if variant_max_order.isdigit() else 0
             }
@@ -180,6 +186,12 @@ def parse_thegioiskinfood_html(soup: BeautifulSoup, product_id: str, product_url
             "options": [option_name],
             "variants": variants_list
         }
+    elif variant_select and len(variant_select) == 1:
+        # Sản phẩm đơn (chỉ 1 option): hoist variant fields lên product-level
+        single_option = variant_select[0]
+        result["sku"] = single_option.get("data-sku", "")
+        result["qty"] = int(single_option.get("data-max", 0)) if single_option.get("data-max", "0").isdigit() else 0
+        result["max_order"] = int(single_option.get("data-max-order", 0)) if single_option.get("data-max-order", "0").isdigit() else 0
     
     return result
 

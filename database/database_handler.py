@@ -140,7 +140,7 @@ class DatabaseHandler:
                     "p_product_id": review_data["product_id"],
                     "p_product_snapshot_id": review_data["product_snapshot_id"],
                     "p_session_id": str(review_data["session_id"]),
-                    "p_pages": review_data["pages"],
+                    "p_total": review_data["pages"],  # Database function uses p_total not p_pages
                 }
             ).execute()
             

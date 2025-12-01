@@ -128,6 +128,11 @@ async def crawl_reviews_thegioiskinfood_async(
     
     logger.info(f"[REVIEW] Product {product_id} has {total_reviews} reviews ({total_pages} pages)")
     
+    # Smart early stopping: Check if already crawled all pages
+    if latest_page >= total_pages:
+        logger.info(f"[REVIEW] Product {product_id}: Already crawled all {total_pages} pages (latest={latest_page})")
+        return 0
+    
     if total_pages <= start_page:
         logger.success(f"[REVIEW] Only 1 page for {product_id}")
         return total_saved

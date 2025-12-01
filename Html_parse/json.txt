@@ -68,7 +68,6 @@
         "price": 223000,
         "final_price": "223.000 ₫",
         "market_price": "279.000 ₫",
-        "int_final_price": 223000,
         "qty": 1,
         "old_qty": 3
       },
@@ -81,7 +80,6 @@
         "price": 343000,
         "final_price": "343.000 ₫",
         "market_price": "429.000 ₫",
-        "int_final_price": 343000,
         "qty": 0,
         "old_qty": 1
       },
@@ -94,7 +92,6 @@
         "price": 343000,
         "final_price": "343.000 ₫",
         "market_price": "429.000 ₫",
-        "int_final_price": 343000,
         "qty": 116,
         "old_qty": 224
       }

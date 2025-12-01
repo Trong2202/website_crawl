@@ -26,21 +26,21 @@ WEBSITE_2_NAME = "thegioiskinfood"
 BRANDS_FILE = "brands.txt"
 
 # Crawl Configuration
-REQUEST_DELAY = 0.5  # Default delay (seconds) - reduced for performance
+REQUEST_DELAY = 0.3  # Default delay (seconds) - optimized for performance
 MAX_RETRIES = 3  # Số lần retry khi request thất bại
 TIMEOUT = 30  # Timeout cho mỗi request (seconds)
 
-# Site-specific delays (seconds)
-WEBSITE_1_DELAY = 0.5  # lamthaocosmetics - faster site
-WEBSITE_2_DELAY = 1.0  # thegioiskinfood - more conservative
+# Site-specific delays (seconds) - OPTIMIZED
+WEBSITE_1_DELAY = 0.3  # lamthaocosmetics - reduced from 0.5s
+WEBSITE_2_DELAY = 0.5  # thegioiskinfood - reduced from 1.0s (API front-end, no bot blocking)
 
-# Review-specific optimization (BIG DATA)
-MAX_REVIEW_CONCURRENT_PAGES = 20  # Fetch multiple pages concurrently per product
-REVIEW_DELAY = 0.3                 # Faster delay for review API
+# Review-specific optimization (BIG DATA) - OPTIMIZED
+MAX_REVIEW_CONCURRENT_PAGES = 25  # Increased from 20 for slow review API
+REVIEW_DELAY = 0.1                 # Reduced from 0.3s (API chậm, tăng concurrency)
 
-# Concurrent processing settings
-MAX_CONCURRENT_REQUESTS = 8  # Max concurrent requests (5-10 range)
-MAX_CONCURRENT_BRANDS = 2  # Process multiple brands in parallel
+# Concurrent processing settings - OPTIMIZED
+MAX_CONCURRENT_REQUESTS = 25  # Increased from 8 (2.5 brands × 10 products)
+MAX_CONCURRENT_BRANDS = 3  # Increased from 2 (process 15 brands faster)
 
 # Headers để giả lập browser
 HEADERS = {

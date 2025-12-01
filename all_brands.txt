@@ -2,7 +2,7 @@
 DANH SÁCH TẤT CẢ BRANDS/THƯƠNG HIỆU
 ================================================================================
 
-LAMTHAOCOSMETICS (433 brands)
+LAMTHAOCOSMETICS (434 brands)
 --------------------------------------------------------------------------------
   1. 3CE
   2. 3W CLINIC
@@ -245,198 +245,199 @@ LAMTHAOCOSMETICS (433 brands)
 239. Laboratorios BABE
 240. Lalarecipe
 241. Lam Thảo
-242. Lanbena
-243. Lancôme
-244. Laura Anne
-245. Laurier
-246. Lebelage
-247. Lemonade
-248. Leocrema
-249. Liese
-250. Lilith And Eve
-251. Lilybyred
-252. Lime
-253. Lip Pure
-254. LipIce
-255. Lipstician
-256. Listerine
-257. Little Dream Garden
-258. Lock&Lock
-259. Loreal
-260. Lovcov
-261. Luvum
-262. MC Make Color
-263. MD CARE
-264. MLBOBO
-265. Ma:nyo
-266. Make P:rem
-267. Malissa Kiss
-268. ManChao
-269. Maputi
-270. Marc Jacobs
-271. Marvis
-272. Mary & May
-273. Maxclinic
-274. Mayan
-275. Mayan Care
-276. Maybelline
-277. Medi-Peel
-278. MediAnswer
-279. Median
-280. Medicube
-281. Mediforcell
-282. Mediheal
-283. Medilip
-284. Mediskinbyc
-285. MegRhythm
-286. Megaduo
-287. Meideme
-288. Meishoku
-289. Melano CC
-290. Melasma X
-291. Menow
-292. Merina
-293. Milanogica
-294. Miseen
-295. Miss Sai Gon
-296. Mizumi
-297. Mlen Diary
-298. Momotani
-299. Monday
-300. Mude
-301. Muzigae Mansion
-302. My Gold Korea
-303. Nacific
-304. Naexy
-305. Narciso
-306. Nature Republic
-307. Nee Cara
-308. Neogen
-309. Neutrogena
-310. Nivea
-311. Nookoi
-312. Nowax
-313. Numbuzin
-314. OGX
-315. OXY
-316. Obagi
-317. Ofmeight
-318. Ofélia
-319. Ohui
-320. Okame
-321. Olay
-322. Old Spice
-323. On The Body
-324. One Day's You
-325. One-day's You
-326. Ongredients
-327. Oral-B
-328. Out Of Office
-329. Paco Rabanne
-330. Pantene
-331. Pasta Del Capitano
-332. Pelican
-333. Perfect Diary
-334. Perioe
-335. Peripera
-336. Perspi-Guard
-337. Perspi-Rock
-338. Petit Cochon
-339. Pop Mart
-340. Pop-Puf
-341. Porêves
-342. Pramy
-343. Pretty Skin
-344. Propolinse
-345. Pyunkang Yul
-346. Re:cipe
-347. Refre
-348. Rejoice
-349. Renoderm
-350. Reskin
-351. Rmon
-352. Rohto
-353. Romand
-354. Rosette
-355. Round Lab
-356. S.O.B
-357. SPES
-358. SVR
-359. Saborino
-360. Scenes
-361. Secret
-362. Secret Key
-363. Selsun
-364. Senka
-365. Senz
-366. Shimbi Method
-367. Shiseido
-368. Silcot
-369. Silkygirl
-370. Simple
-371. Skin Aqua
-372. Skin1004
-373. Skinfood
-374. Skinlovers
-375. So Natural
-376. So'Natural
-377. Some By Mi
-378. Springen
-379. St.Ives
-380. Sugar N Sugar
-381. Sugarplum
-382. Sungboon Editor
-383. Sunplay
-384. Super Nova
-385. Sur.Medic+
-386. THE LAB
-387. Taiyo No Sachi
-388. Tesori D'Oriente
-389. The Face Shop
-390. The Saem
-391. The Whoo
-392. Thomas Kosmala
-393. Tia'm
-394. Tiam
-395. Tippys
-396. TirTir
-397. To do list
-398. Tocobo
-399. Too Cool For School
-400. Topicrem
-401. Torriden
-402. Tsubaki
-403. Ukiss
-404. Unleashia
-405. Uno
-406. Unove
-407. Unpa
-408. V.Rohto
-409. VT Cosmetics
-410. Vacosi
-411. Vagisil
-412. Vaseline
-413. Veet
-414. Vegan Super
-415. Vichy
-416. Vidal
-417. Viplus+
-418. Việt Đức
-419. Wakemake
-420. Weilaiya
-421. Wellage
-422. Wellderma
-423. Wettrust
-424. Whisis
-425. Whisper
-426. White Conc
-427. Wonjin
-428. X Cute Me
-429. Ya Samaya
-430. Yukazan
-431. Yusachi
-432. Ziaja
-433. mac
+242. Lamelin
+243. Lanbena
+244. Lancôme
+245. Laura Anne
+246. Laurier
+247. Lebelage
+248. Lemonade
+249. Leocrema
+250. Liese
+251. Lilith And Eve
+252. Lilybyred
+253. Lime
+254. Lip Pure
+255. LipIce
+256. Lipstician
+257. Listerine
+258. Little Dream Garden
+259. Lock&Lock
+260. Loreal
+261. Lovcov
+262. Luvum
+263. MC Make Color
+264. MD CARE
+265. MLBOBO
+266. Ma:nyo
+267. Make P:rem
+268. Malissa Kiss
+269. ManChao
+270. Maputi
+271. Marc Jacobs
+272. Marvis
+273. Mary & May
+274. Maxclinic
+275. Mayan
+276. Mayan Care
+277. Maybelline
+278. Medi-Peel
+279. MediAnswer
+280. Median
+281. Medicube
+282. Mediforcell
+283. Mediheal
+284. Medilip
+285. Mediskinbyc
+286. MegRhythm
+287. Megaduo
+288. Meideme
+289. Meishoku
+290. Melano CC
+291. Melasma X
+292. Menow
+293. Merina
+294. Milanogica
+295. Miseen
+296. Miss Sai Gon
+297. Mizumi
+298. Mlen Diary
+299. Momotani
+300. Monday
+301. Mude
+302. Muzigae Mansion
+303. My Gold Korea
+304. Nacific
+305. Naexy
+306. Narciso
+307. Nature Republic
+308. Nee Cara
+309. Neogen
+310. Neutrogena
+311. Nivea
+312. Nookoi
+313. Nowax
+314. Numbuzin
+315. OGX
+316. OXY
+317. Obagi
+318. Ofmeight
+319. Ofélia
+320. Ohui
+321. Okame
+322. Olay
+323. Old Spice
+324. On The Body
+325. One Day's You
+326. One-day's You
+327. Ongredients
+328. Oral-B
+329. Out Of Office
+330. Paco Rabanne
+331. Pantene
+332. Pasta Del Capitano
+333. Pelican
+334. Perfect Diary
+335. Perioe
+336. Peripera
+337. Perspi-Guard
+338. Perspi-Rock
+339. Petit Cochon
+340. Pop Mart
+341. Pop-Puf
+342. Porêves
+343. Pramy
+344. Pretty Skin
+345. Propolinse
+346. Pyunkang Yul
+347. Re:cipe
+348. Refre
+349. Rejoice
+350. Renoderm
+351. Reskin
+352. Rmon
+353. Rohto
+354. Romand
+355. Rosette
+356. Round Lab
+357. S.O.B
+358. SPES
+359. SVR
+360. Saborino
+361. Scenes
+362. Secret
+363. Secret Key
+364. Selsun
+365. Senka
+366. Senz
+367. Shimbi Method
+368. Shiseido
+369. Silcot
+370. Silkygirl
+371. Simple
+372. Skin Aqua
+373. Skin1004
+374. Skinfood
+375. Skinlovers
+376. So Natural
+377. So'Natural
+378. Some By Mi
+379. Springen
+380. St.Ives
+381. Sugar N Sugar
+382. Sugarplum
+383. Sungboon Editor
+384. Sunplay
+385. Super Nova
+386. Sur.Medic+
+387. THE LAB
+388. Taiyo No Sachi
+389. Tesori D'Oriente
+390. The Face Shop
+391. The Saem
+392. The Whoo
+393. Thomas Kosmala
+394. Tia'm
+395. Tiam
+396. Tippys
+397. TirTir
+398. To do list
+399. Tocobo
+400. Too Cool For School
+401. Topicrem
+402. Torriden
+403. Tsubaki
+404. Ukiss
+405. Unleashia
+406. Uno
+407. Unove
+408. Unpa
+409. V.Rohto
+410. VT Cosmetics
+411. Vacosi
+412. Vagisil
+413. Vaseline
+414. Veet
+415. Vegan Super
+416. Vichy
+417. Vidal
+418. Viplus+
+419. Việt Đức
+420. Wakemake
+421. Weilaiya
+422. Wellage
+423. Wellderma
+424. Wettrust
+425. Whisis
+426. Whisper
+427. White Conc
+428. Wonjin
+429. X Cute Me
+430. Ya Samaya
+431. Yukazan
+432. Yusachi
+433. Ziaja
+434. mac
 
 ================================================================================
 
@@ -666,5 +667,5 @@ THEGIOISKINFOOD (222 brands)
 222. Zeesea
 
 ================================================================================
-TỔNG CỘ: 541 brands unique
+TỔNG CỘ: 542 brands unique
 ================================================================================

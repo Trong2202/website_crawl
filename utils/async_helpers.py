@@ -28,10 +28,11 @@ async def get_session() -> ClientSession:
     async with _session_lock:
         if _session is None or _session.closed:
             connector = TCPConnector(
-                limit=200,  # Total connections (increased for aggressive crawling)
-                limit_per_host=50,  # Per host limit (increased for review API)
-                ttl_dns_cache=300,  # DNS cache
-                enable_cleanup_closed=True
+                limit=300,  # Total connections (optimized for 25 workers)
+                limit_per_host=100,  # Per host limit (review API needs high concurrency)
+                ttl_dns_cache=600,  # DNS cache (longer for performance)
+                enable_cleanup_closed=True,
+                force_close=False  # Reuse connections for better performance
             )
             timeout = ClientTimeout(total=config.TIMEOUT)
             _session = ClientSession(

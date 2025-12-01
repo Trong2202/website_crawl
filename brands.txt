@@ -2,20 +2,20 @@
 # Danh sách các hãng cần crawl (mỗi dòng một hãng)
 # Để trống hoặc comment tất cả để crawl tất cả hãng
 
-#CeraVe
-#Cocoon
-#Cetaphil
-#La Roche-Posay
-#L'Oreal
-#Paula's Choice
-#St.Ives
-#Bioderma
-#Eucerin
-#Simple
-#Garnier
-#Rosette
-#SVR
+Cerave
+Cocoon
+Cetaphil
+La Roche-Posay
+Paula's Choice
+St.Ives
+Bioderma
+Eucerin
+Simple
+Garnier
+Rosette
+SVR
 Huxley
 Caryophy
+Obagi
 
 
