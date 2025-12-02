@@ -78,7 +78,7 @@ async def run_listing_crawler_async():
     
     try:
         # Process multiple brands in parallel (aggressive)
-        batch_size = 4  # 4 brands at once
+        batch_size = 5  # 5 brands at once - khớp với MAX_CONCURRENT_BRANDS
         
         for i in range(0, len(brands), batch_size):
             batch = brands[i:i + batch_size]

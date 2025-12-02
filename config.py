@@ -26,21 +26,21 @@ WEBSITE_2_NAME = "thegioiskinfood"
 BRANDS_FILE = "brands.txt"
 
 # Crawl Configuration
-REQUEST_DELAY = 0.3  # Default delay (seconds) - optimized for performance
+REQUEST_DELAY = 0.3  # Độ trễ mặc định (giây) - đã tối ưu hiệu suất
 MAX_RETRIES = 3  # Số lần retry khi request thất bại
-TIMEOUT = 30  # Timeout cho mỗi request (seconds)
+TIMEOUT = 30  # Timeout cho mỗi request (giây)
 
-# Site-specific delays (seconds) - OPTIMIZED
-WEBSITE_1_DELAY = 0.3  # lamthaocosmetics - reduced from 0.5s
-WEBSITE_2_DELAY = 0.5  # thegioiskinfood - reduced from 1.0s (API front-end, no bot blocking)
+# Độ trễ riêng cho từng website (giây) - ĐÃ TỐI ƯU
+WEBSITE_1_DELAY = 0.3  # lamthaocosmetics - giảm từ 0.5s
+WEBSITE_2_DELAY = 0.5  # thegioiskinfood - giảm từ 1.0s (API front-end, không chặn bot)
 
-# Review-specific optimization (BIG DATA) - OPTIMIZED
-MAX_REVIEW_CONCURRENT_PAGES = 25  # Increased from 20 for slow review API
-REVIEW_DELAY = 0.1                 # Reduced from 0.3s (API chậm, tăng concurrency)
+# Tối ưu riêng cho reviews (DỮ LIỆU LỚN) - ĐÃ TỐI ƯU
+MAX_REVIEW_CONCURRENT_PAGES = 20 # Số trang reviews crawl đồng thời (tăng từ 10 cho API reviews chậm)
+REVIEW_DELAY = 0.2               # Độ trễ giữa các request reviews - giảm từ 0.3s (API chậm, tăng concurrency)
 
-# Concurrent processing settings - OPTIMIZED
-MAX_CONCURRENT_REQUESTS = 25  # Increased from 8 (2.5 brands × 10 products)
-MAX_CONCURRENT_BRANDS = 3  # Increased from 2 (process 15 brands faster)
+# Cài đặt xử lý đồng thời - ĐÃ TỐI ƯU
+MAX_CONCURRENT_REQUESTS = 20 # Số requests đồng thời tối đa - tăng từ 8 (2.5 brands × 10 products)
+MAX_CONCURRENT_BRANDS = 5  # Số brands xử lý đồng thời - tăng từ 3 (crawl 15 brands nhanh hơn, KHÔNG giới hạn tổng số brands)
 
 # Headers để giả lập browser
 HEADERS = {
@@ -56,8 +56,8 @@ HEADERS = {
     "Cache-Control": "max-age=0"
 }
 
-# Review API Configuration (thegioiskinfood only)
+# Cấu hình API Reviews (chỉ cho thegioiskinfood)
 REVIEW_API_BASE = "https://customer-reviews-api.haravan.app/api/buyer/product_rating"
 REVIEW_API_ORG_ID = "1000006063"
-REVIEW_API_LIMIT = 10
+REVIEW_API_LIMIT = 10  # Số reviews mỗi trang API trả về
 
